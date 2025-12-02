@@ -2,12 +2,12 @@ import kotlin.math.sign
 
 object Day01 {
 
-    enum class Direction(val signum: Int) {
+    enum class Direction(val sign: Int) {
         LEFT(-1),
         RIGHT(1);
 
         companion object {
-            fun parse(c: Char) = if (c == 'L') Direction.LEFT else Direction.RIGHT
+            fun parse(c: Char) = if (c == 'L') LEFT else RIGHT
         }
 
     }
@@ -19,23 +19,23 @@ object Day01 {
     }
 
     fun rotate(position: Int, rotation: Rotation) =
-        (position + (rotation.direction.signum * rotation.distance)).mod(100)
+        (position + (rotation.direction.sign * rotation.distance)).mod(100)
 
     data class PositionAndZeroCount(val position: Int, val zeroCount: Int) {
         fun rotate(rotation: Rotation): PositionAndZeroCount {
             val newPosition = rotate(position, rotation)
-            val newZeroCount = (position + (rotation.direction.signum * rotation.distance))
+            val newZeroCount = (position + (rotation.direction.sign * rotation.distance))
                 .let { if (it > 0) it / 100 else -it / 100 + position.sign }
             return PositionAndZeroCount(newPosition, zeroCount + newZeroCount)
         }
     }
 
-    private fun part1(lines: List<String>) =
+    fun part1(lines: List<String>) =
         lines.map(Rotation::parse)
             .runningFold(50, ::rotate)
             .count { it == 0 }
 
-    private fun part2(lines: List<String>): Int =
+    fun part2(lines: List<String>): Int =
         lines.map(Rotation::parse)
             .fold(PositionAndZeroCount(50, 0), PositionAndZeroCount::rotate)
             .zeroCount
