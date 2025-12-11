@@ -9,46 +9,35 @@ object Day11 {
             .map { start to it }
     }
 
-    fun List<Connection>.waysTo(goal: String, cache: MutableMap<String, Long> = mutableMapOf()): Long {
-        return if (cache.containsKey(goal)) return cache[goal]!!
-        else if (goal == "you") 1
-        else filter { it.second == goal }
-            .sumOf { waysTo(it.first, cache) }
-            .also { cache[goal] = it }
-    }
-
-    fun List<Connection>.waysPart2(): Long {
-        return waysFromTo("svr", "dac", setOf("fft")) *
-                waysFromTo("dac", "fft") *
-                waysFromTo("fft", "out") +
-                waysFromTo("fft", "dac") *
-                waysFromTo("svr", "fft", setOf("dac")) *
-                waysFromTo("dac", "out")
-
-    }
-
     fun List<Connection>.waysFromTo(
         from: String,
         to: String,
-        without: Set<String> = emptySet(),
+        without: String? = null,
         cache: MutableMap<String, Long> = mutableMapOf()
     ): Long {
         return if (cache.containsKey(to)) return cache[to]!!
         else if (to == from) 1
-        else filter { it.second == to && it.first !in without }
-            .sumOf { waysFromTo(from, it.first, without + it.first, cache) }
+        else filter { it.second == to && it.first != without }
+            .sumOf { waysFromTo(from, it.first, without, cache) }
             .also { cache[to] = it }
     }
 
 
     fun part1(lines: List<String>): Long {
         val connections = lines.flatMap { parseConnections(it) }
-        return connections.waysTo("out")
+        return connections.waysFromTo("you", "out")
     }
 
     fun part2(lines: List<String>): Long {
         val connections = lines.flatMap { parseConnections(it) }
-        return connections.waysPart2()
+        return connections.run {
+            waysFromTo("svr", "dac", "fft") *
+                    waysFromTo("dac", "fft") *
+                    waysFromTo("fft", "out") +
+                    waysFromTo("fft", "dac") *
+                    waysFromTo("svr", "fft", "dac") *
+                    waysFromTo("dac", "out")
+        }
     }
 
     fun main() {
